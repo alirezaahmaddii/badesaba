@@ -1,6 +1,6 @@
 <script lang="ts" setup>
-import LeftSectionLogin from './components/LeftSectionLogin.vue';
-import RightSectionLogin from './components/RightSectionLogin.vue';
+import LeftSectionLogin from '@/pages/login/core/components/LeftSectionLogin.vue';
+import RightSectionLogin from '@/pages/login/core/components/RightSectionLogin.vue';
 </script>
 <template>
   <v-col md="9" class="mx-auto d-flex align-center w-100 h-100">

@@ -1,5 +1,5 @@
 <script setup>
-import logoIcon from '../../../../public/badesaba_icon.svg';
+import logoIcon from '../../../../../public/badesaba_icon.svg';
 </script>
 
 <template>

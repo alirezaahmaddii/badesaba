@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import { object, string } from "yup";
 import { computed, reactive, ref } from 'vue';
+import { useRouter } from 'vue-router';
 
 type loginInformationUser = {
   username: string,
   password: string,
 }
+const router = useRouter();
 
 const snackBar = ref<boolean>(false)
 const snackBarMessage = ref<string>('مشکلی رخ داده است')
@@ -18,12 +19,8 @@ const validationFields = reactive<loginInformationUser>({
     password: ''
 })
 
-const validationFieldsSchema = object().shape({
-  username: string().required().email(),
-  password: string().required(),
-});
-
   const submitLoginForm = () => {
+    router.push('/home');
     snackBar.value = true;
   }
 

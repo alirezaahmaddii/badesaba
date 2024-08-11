@@ -11,6 +11,7 @@
     "core-js": "^3.37.1",
     "roboto-fontface": "*",
     "vue": "^3.4.31",
+    "vue3-treeview": "^0.4.2",
     "vuetify": "^3.6.11",
     "yup": "^1.4.0"
   },

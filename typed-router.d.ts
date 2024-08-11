@@ -19,8 +19,10 @@ declare module 'vue-router/auto-routes' {
    */
   export interface RouteNamedMap {
     '/home/': RouteRecordInfo<'/home/', '/home', Record<never, never>, Record<never, never>>,
+    '/home/core/components/ShowCategory': RouteRecordInfo<'/home/core/components/ShowCategory', '/home/core/components/ShowCategory', Record<never, never>, Record<never, never>>,
+    '/home/core/components/TreeViewCheckbox': RouteRecordInfo<'/home/core/components/TreeViewCheckbox', '/home/core/components/TreeViewCheckbox', Record<never, never>, Record<never, never>>,
     '/login/': RouteRecordInfo<'/login/', '/login', Record<never, never>, Record<never, never>>,
-    '/login/components/LeftSectionLogin': RouteRecordInfo<'/login/components/LeftSectionLogin', '/login/components/LeftSectionLogin', Record<never, never>, Record<never, never>>,
-    '/login/components/RightSectionLogin': RouteRecordInfo<'/login/components/RightSectionLogin', '/login/components/RightSectionLogin', Record<never, never>, Record<never, never>>,
+    '/login/core/components/LeftSectionLogin': RouteRecordInfo<'/login/core/components/LeftSectionLogin', '/login/core/components/LeftSectionLogin', Record<never, never>, Record<never, never>>,
+    '/login/core/components/RightSectionLogin': RouteRecordInfo<'/login/core/components/RightSectionLogin', '/login/core/components/RightSectionLogin', Record<never, never>, Record<never, never>>,
   }
 }
