@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, reactive, ref } from 'vue';
 import { useRouter } from 'vue-router';
+import loginMock from '../mock/loginMock.json'
 
 type loginInformationUser = {
   username: string,
@@ -15,14 +16,18 @@ const rulesForInputs = [
 ];
 
 const validationFields = reactive<loginInformationUser>({
-    username: '',
-    password: ''
+  username: '',
+  password: ''
 })
 
-  const submitLoginForm = () => {
+const submitLoginForm = () => {
+  if (loginMock.username === validationFields.username && loginMock.userPassword === validationFields.password) {
+    localStorage.setItem('userToken', JSON.stringify(loginMock))
     router.push('/home');
-    snackBar.value = true;
   }
+  snackBarMessage.value = 'نام کاربری یا رمز عبور اشتباه است';
+  snackBar.value = true;
+}
 
 const isButtonDisabled = computed(() => {
   return !validationFields.username || !validationFields.password;
@@ -61,7 +66,7 @@ const isButtonDisabled = computed(() => {
     </div>
     <div>
       <v-btn width="100%" variant="tonal" size="x-large" @click="submitLoginForm" :disabled="isButtonDisabled">
-          ورود
+        ورود
       </v-btn>
     </div>
   </div>

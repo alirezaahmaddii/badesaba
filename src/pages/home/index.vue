@@ -1,48 +1,117 @@
 <script lang="ts" setup>
-import { ref } from 'vue';
+import { computed, reactive, ref } from 'vue';
 import TreeViewCheckbox from '@/pages/home/core/components/TreeViewCheckbox.vue';
 import ShowCategory from '@/pages/home/core/components/ShowCategory.vue';
+import categoriesData from '@/pages/home/core/schema/categoriesTree.json';
+import actionList from './core/schema/actions.json';
+import { useRouter } from 'vue-router';
+import BreadcrumbsLink from '@/pages/home/core/components/BreadcrumbsLink.vue';
+const router = useRouter();
 
-const items = [
-  {
-    title: 'لیست نقش ها',
-    disabled: true,
-    href: 'breadcrumbs_link_1',
-  },
-  {
-    title: 'افزدودن نقش',
-    disabled: false,
-    href: 'breadcrumbs_link_2',
-  },
-];
 const roleName = ref<string>('');
 const description = ref<string>('');
-const activeButton = ref<boolean>(false);
+const statusActiveUser = ref<boolean>(false);
+const activeAction = ref([]);
+const selectProduct = ref('product1');
+const roots = ref<{ [key: string]: object[] }>({
+  product1: [],
+  product2: []
+});
 const searchBycategory = ref<string>('');
+const snackBar = ref<boolean>(false)
+const products: { [keys: string]: object[] } = {
+  product1: [],
+  product2: [],
+}
+const productList = computed(() => products[selectProduct.value]);
+const rootsList = computed(() => roots.value[selectProduct.value]);
+const actionListFilterByCategory = ref<any>({});
+
+const actionListBySelectCategory = (nodes: { [key: string]: any }) => {
+
+  Object.keys(nodes).map((key) => {
+    if (nodes[key].state.checked === true) {
+      if (!actionListFilterByCategory.value[nodes[key].originalId]) {
+        actionList.map((item) => {
+          if (item.category === nodes[key].originalId) {
+            if (!actionListFilterByCategory.value[nodes[key].originalId]) {
+              actionListFilterByCategory.value[nodes[key].originalId] = {
+                actionListFilter: [],
+                title: nodes[key].text,
+                id: nodes[key].originalId
+              };
+            }
+            actionListFilterByCategory.value[nodes[key].originalId].actionListFilter.push(item);
+          }
+        });
+      }
+    }
+  });
+};
+const actionListUnselectCategory = (nodes: { [key: string]: any }) => {
+  Object.keys(nodes).map((key) => {
+    if (actionListFilterByCategory.value[nodes[key].originalId]?.id === nodes[key].originalId && !nodes[key].state.checked) {
+      delete actionListFilterByCategory.value[nodes[key].originalId];
+    }
+  })
+};
+
+const updateActionList = (newActionList: any) => {
+  activeAction.value = newActionList;
+};
+
+const payloadData = reactive({
+  name: '',
+  description: '',
+  active: false,
+  actionIds: []
+})
+const sendInformation = () => {
+  payloadData.name = roleName.value;
+  payloadData.description = description.value;
+  payloadData.active = statusActiveUser.value;
+  payloadData.actionIds = activeAction.value;
+  snackBar.value = true;
+}
+
+const loginButton = () => {
+  localStorage.removeItem('userToken');
+  router.push('/login');
+}
+
+categoriesData.filter((item) => {
+  if (item.productId === '1') {
+    roots.value.product1.push(item.id as any)
+    return products.product1.push(item);
+  } else if (item.productId === '2') {
+    roots.value.product2.push(item.id as any)
+    return products.product2.push(item);
+  }
+  return 0;
+});
+
 </script>
 <template>
-  <v-app-bar :elevation="0" class="bg-primary"/>
+  <v-app-bar :elevation="0" class="bg-primary">
+    <button @click="loginButton">
+      خروج
+    </button>
+  </v-app-bar>
   <div class="d-flex">
     <!--  sidebar section  -->
     <v-col lg="3">
       <div class="pr-16">
-        <div class="d-flex align-center">
-          <v-btn
-              size="x-small"
-              rounded="rounded"
-              elevation="0"
-              border="md"
-              density="default"
-              icon="mdi-chevron-right"
-              class="opacity-70"
-              width="25"
-              height="25"
-          />
-          <v-breadcrumbs :items="items"/>
-        </div>
-        <div>
-          <div>پنل 1</div>
-          <div>پنل 2</div>
+      <BreadcrumbsLink />
+        <div class="d-flex flex-column ga-4">
+          <div
+              :class="`sidebar-item px-3 py-4 bg-purple-lighten-5 opacity-50 text-primary cursor-pointer ${selectProduct === 'product1' && 'opacity-100'}`"
+              @click="() => {selectProduct = 'product1'}">
+            پنل 1
+          </div>
+          <div
+              :class="`sidebar-item px-3 py-4 bg-purple-lighten-5 opacity-50 text-primary cursor-pointer ${selectProduct === 'product2' && 'opacity-100'}`"
+              @click="() => {selectProduct = 'product2'}">پنل 2
+          </div>
         </div>
       </div>
 
@@ -51,21 +120,30 @@ const searchBycategory = ref<string>('');
     <v-col lg="2">
       <div>
         <div>
-          <v-text-field label="نقش مسئول" variant="solo" v-model="roleName"/>
+          <v-text-field label="نقش مسئول" variant="solo" single-line v-model="roleName"/>
         </div>
         <div>
           <v-card>
             <template v-slot:title>
               <v-text-field
                   prepend-inner-icon="mdi-magnify"
-                  label="Append inner"
+                  label="جستجوی عنوان دسترسی"
                   variant="underlined"
                   single-line
                   v-model="searchBycategory"
               ></v-text-field>
             </template>
             <div>
-              <TreeViewCheckbox/>
+              <KeepAlive>
+                <TreeViewCheckbox
+                    :key="selectProduct"
+                    :product-list="productList"
+                    :roots="rootsList"
+                    :search-filter="searchBycategory"
+                    @selectCategory="actionListBySelectCategory"
+                    @unselectCategory="actionListUnselectCategory"
+                />
+              </KeepAlive>
             </div>
           </v-card>
         </div>
@@ -76,29 +154,53 @@ const searchBycategory = ref<string>('');
       <div class="d-flex flex-column">
         <div class="d-flex justify-space-between">
           <div class="w-33">
-            <v-text-field label="توضیحات" variant="solo" v-model="description"/>
+            <v-text-field label="توضیحات" variant="solo" single-line v-model="description"/>
           </div>
           <div>
             <v-switch
-                v-model="activeButton"
+                v-model="statusActiveUser"
                 color="primary"
-                :label="activeButton ? 'فعال' : 'غیرفعال'"
+                :label="statusActiveUser ? 'فعال' : 'غیرفعال'"
             ></v-switch>
           </div>
         </div>
-        <div>
-          <ShowCategory/>
+        <div v-for="item in actionListFilterByCategory">
+          <ShowCategory :select-category="item" @update-action-list="updateActionList"/>
         </div>
         <div class="d-flex align-center ga-2 align-self-end">
           <v-btn variant="outlined" color="primary">
             بازگشت
           </v-btn>
-          <v-btn variant="flat" color="primary">
+          <v-btn variant="flat" color="primary" @click="sendInformation">
             تایید
           </v-btn>
         </div>
       </div>
     </v-col>
   </div>
+  <v-snackbar
+      v-model="snackBar"
+  >
+    برای دیدن بهتر payload میتوانید کنسول مرورگر خود را نیز باز کنید
+    <br>
+    Role Name: {{ payloadData.name }}
+    Describe: {{ payloadData.description }}
+    Active: {{ payloadData.active }}
+    Action Id: {{ payloadData.actionIds }}
+    <template v-slot:action="{ attrs }">
+      <v-btn
+          color="pink"
+          v-bind="attrs"
+          @click="snackBar = false"
+      >
+        Close
+      </v-btn>
+    </template>
+  </v-snackbar>
 </template>
 
+<style scoped lang="scss">
+.sidebar-item {
+  clip-path: polygon(9% 1%, 100% 0, 100% 50%, 100% 100%, 8% 100%, 0% 50%);
+}
+</style>
