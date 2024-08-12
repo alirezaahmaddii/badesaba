@@ -1,10 +1,10 @@
 <script setup lang="ts">
 
-import { breadcrumbs } from '@/pages/home/core/constant';
+import { breadcrumbs } from '../constant';
 </script>
 
 <template>
-  <div class="d-flex align-center">
+  <div class="d-flex align-center text-no-wrap">
     <v-btn
         size="x-small"
         rounded="rounded"

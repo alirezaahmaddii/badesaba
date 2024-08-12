@@ -53,15 +53,15 @@ const addActionList = () => {
     <div class="w-100">
 
       <v-radio-group inline @change="addActionList" v-model="radioLevel">
-        <v-radio label="دسترسی انتشار" :value="100"></v-radio>
-        <v-radio label="دسترسی ویرایش" :value="200"></v-radio>
-        <v-radio label="دسترسی مشاهده" :value="300"></v-radio>
+        <v-radio color="primary" label="دسترسی انتشار" :value="100"></v-radio>
+        <v-radio color="primary" label="دسترسی ویرایش" :value="200"></v-radio>
+        <v-radio color="primary" label="دسترسی مشاهده" :value="300"></v-radio>
       </v-radio-group>
     </div>
   </div>
   <div>
     <v-list lines="one" class="d-flex ga-4 flex-wrap">
-      <v-list-item class="opacity-50 list-item" v-for="item in props.selectCategory.actionListFilter">
+      <v-list-item class="opacity-50 list-item" v-for="item in props.selectCategory.actionListFilter" :key="item._id">
         <div>
           <v-icon>mdi-circle-medium</v-icon>
           {{ item.name }}

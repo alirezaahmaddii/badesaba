@@ -6,14 +6,24 @@ import categoriesData from '@/pages/home/core/schema/categoriesTree.json';
 import actionList from './core/schema/actions.json';
 import { useRouter } from 'vue-router';
 import BreadcrumbsLink from '@/pages/home/core/components/BreadcrumbsLink.vue';
+import HeaderPage from '@/pages/home/core/components/HeaderPage.vue';
+import {
+  actionListItemType,
+  categoryDataType,
+  nodeItemType,
+  payloadDataType,
+  rootsTreeType
+} from '@/pages/home/core/models';
+import SnackbarComponent from '@/pages/home/core/components/SnackbarComponent.vue';
+
 const router = useRouter();
 
 const roleName = ref<string>('');
 const description = ref<string>('');
 const statusActiveUser = ref<boolean>(false);
-const activeAction = ref([]);
+const activeAction = ref<string[]>([]);
 const selectProduct = ref('product1');
-const roots = ref<{ [key: string]: object[] }>({
+const roots = ref<rootsTreeType>({
   product1: [],
   product2: []
 });
@@ -25,12 +35,11 @@ const products: { [keys: string]: object[] } = {
 }
 const productList = computed(() => products[selectProduct.value]);
 const rootsList = computed(() => roots.value[selectProduct.value]);
-const actionListFilterByCategory = ref<any>({});
 
-const actionListBySelectCategory = (nodes: { [key: string]: any }) => {
-
+const actionListFilterByCategory = ref<Record<string, actionListItemType>>({});
+const actionListSelectCategory = (nodes: Record<string, nodeItemType>) => {
   Object.keys(nodes).map((key) => {
-    if (nodes[key].state.checked === true) {
+    if (nodes[key].state.checked) {
       if (!actionListFilterByCategory.value[nodes[key].originalId]) {
         actionList.map((item) => {
           if (item.category === nodes[key].originalId) {
@@ -48,43 +57,49 @@ const actionListBySelectCategory = (nodes: { [key: string]: any }) => {
     }
   });
 };
-const actionListUnselectCategory = (nodes: { [key: string]: any }) => {
+const actionListUnselectCategory = (nodes: Record<string, nodeItemType>) => {
   Object.keys(nodes).map((key) => {
     if (actionListFilterByCategory.value[nodes[key].originalId]?.id === nodes[key].originalId && !nodes[key].state.checked) {
       delete actionListFilterByCategory.value[nodes[key].originalId];
     }
   })
 };
-
-const updateActionList = (newActionList: any) => {
-  activeAction.value = newActionList;
+const updateActionList = (newActionList: string[]) => {
+  newActionList.map((item) => {
+    console.log(item);
+  })
+  const uniqueItems = newActionList.filter(item => !activeAction.value.includes(item));
+  activeAction.value = [...activeAction.value, ...uniqueItems];
 };
-
-const payloadData = reactive({
+const payloadData = reactive<payloadDataType>({
   name: '',
   description: '',
   active: false,
   actionIds: []
 })
 const sendInformation = () => {
+  snackBar.value = true;
   payloadData.name = roleName.value;
   payloadData.description = description.value;
   payloadData.active = statusActiveUser.value;
   payloadData.actionIds = activeAction.value;
-  snackBar.value = true;
+  setTimeout(() => {
+    snackBar.value = false;
+  }, 2000)
+  console.log(payloadData);
 }
-
-const loginButton = () => {
+const logoutAction = () => {
   localStorage.removeItem('userToken');
   router.push('/login');
 }
-
-categoriesData.filter((item) => {
+const categoryList:categoryDataType[] = categoriesData;
+// initial roots for tree nodes
+categoryList.filter((item) => {
   if (item.productId === '1') {
-    roots.value.product1.push(item.id as any)
+    roots.value.product1.push(item.id as string)
     return products.product1.push(item);
   } else if (item.productId === '2') {
-    roots.value.product2.push(item.id as any)
+    roots.value.product2.push(item.id as string)
     return products.product2.push(item);
   }
   return 0;
@@ -92,14 +107,10 @@ categoriesData.filter((item) => {
 
 </script>
 <template>
-  <v-app-bar :elevation="0" class="bg-primary">
-    <button @click="loginButton">
-      خروج
-    </button>
-  </v-app-bar>
+  <HeaderPage @exit-action="logoutAction" />
   <div class="d-flex">
     <!--  sidebar section  -->
-    <v-col lg="3">
+    <v-col lg="2" md="3">
       <div class="pr-16">
       <BreadcrumbsLink />
         <div class="d-flex flex-column ga-4">
@@ -117,7 +128,7 @@ categoriesData.filter((item) => {
 
     </v-col>
     <!--  search section  -->
-    <v-col lg="2">
+    <v-col lg="2" md="3" class="pr-10">
       <div>
         <div>
           <v-text-field label="نقش مسئول" variant="solo" single-line v-model="roleName"/>
@@ -140,7 +151,7 @@ categoriesData.filter((item) => {
                     :product-list="productList"
                     :roots="rootsList"
                     :search-filter="searchBycategory"
-                    @selectCategory="actionListBySelectCategory"
+                    @selectCategory="actionListSelectCategory"
                     @unselectCategory="actionListUnselectCategory"
                 />
               </KeepAlive>
@@ -164,8 +175,8 @@ categoriesData.filter((item) => {
             ></v-switch>
           </div>
         </div>
-        <div v-for="item in actionListFilterByCategory">
-          <ShowCategory :select-category="item" @update-action-list="updateActionList"/>
+        <div v-for="item in actionListFilterByCategory" :key="item.id">
+          <ShowCategory :select-category="item" @updateActionList="updateActionList"/>
         </div>
         <div class="d-flex align-center ga-2 align-self-end">
           <v-btn variant="outlined" color="primary">
@@ -178,25 +189,7 @@ categoriesData.filter((item) => {
       </div>
     </v-col>
   </div>
-  <v-snackbar
-      v-model="snackBar"
-  >
-    برای دیدن بهتر payload میتوانید کنسول مرورگر خود را نیز باز کنید
-    <br>
-    Role Name: {{ payloadData.name }}
-    Describe: {{ payloadData.description }}
-    Active: {{ payloadData.active }}
-    Action Id: {{ payloadData.actionIds }}
-    <template v-slot:action="{ attrs }">
-      <v-btn
-          color="pink"
-          v-bind="attrs"
-          @click="snackBar = false"
-      >
-        Close
-      </v-btn>
-    </template>
-  </v-snackbar>
+  <SnackbarComponent :payloadData="payloadData" :snackBar="snackBar"  />
 </template>
 
 <style scoped lang="scss">

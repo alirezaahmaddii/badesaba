@@ -20,7 +20,9 @@ declare module 'vue-router/auto-routes' {
   export interface RouteNamedMap {
     '/home/': RouteRecordInfo<'/home/', '/home', Record<never, never>, Record<never, never>>,
     '/home/core/components/BreadcrumbsLink': RouteRecordInfo<'/home/core/components/BreadcrumbsLink', '/home/core/components/BreadcrumbsLink', Record<never, never>, Record<never, never>>,
+    '/home/core/components/HeaderPage': RouteRecordInfo<'/home/core/components/HeaderPage', '/home/core/components/HeaderPage', Record<never, never>, Record<never, never>>,
     '/home/core/components/ShowCategory': RouteRecordInfo<'/home/core/components/ShowCategory', '/home/core/components/ShowCategory', Record<never, never>, Record<never, never>>,
+    '/home/core/components/SnackbarComponent': RouteRecordInfo<'/home/core/components/SnackbarComponent', '/home/core/components/SnackbarComponent', Record<never, never>, Record<never, never>>,
     '/home/core/components/TreeViewCheckbox': RouteRecordInfo<'/home/core/components/TreeViewCheckbox', '/home/core/components/TreeViewCheckbox', Record<never, never>, Record<never, never>>,
     '/login/': RouteRecordInfo<'/login/', '/login', Record<never, never>, Record<never, never>>,
     '/login/core/components/LeftSectionLogin': RouteRecordInfo<'/login/core/components/LeftSectionLogin', '/login/core/components/LeftSectionLogin', Record<never, never>, Record<never, never>>,
